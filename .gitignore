@@ -23,7 +23,7 @@
 hs_err_pid*
 
 # IntelliJ generated repo 
-*/idea/**
+**/idea/**
 
 # Target Repo 
-*/target/**
+**/target/**

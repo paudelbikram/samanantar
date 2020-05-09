@@ -1,0 +1,63 @@
+CONCURRENCY IN JAVA 8
+
+Threads and Runnables:
+All modern operating systems support concurrency both via processes and threads.
+Processes are instance of programs which will typically run independent to each
+other. Eg if you start a java program, the operating system spawns a new process
+which runs in parallel to other programs. Inside those processes we can utilize
+threads to execute code concurrently, so we can make the most out of available
+cores of the CPU.
+
+Before starting a thread i Java, you have to specify the code to be executed by
+this thread, often called the task.
+
+
+Executors:
+ExecutorService is a higher level replacement for working with threads directly.
+Executors are capable of running asynchronous task and typically manage a pool of
+threads, so we don't have to create new threads manually. All threads of the internal
+pool will be reused under the hood for revenant tasks, so we can run as many concurrent
+tasks as we want throughout the life-cycle of our application with a single executor
+service.
+
+Callable and Futures:
+In addition to Runnable executors support another kind of task named Callable.
+Callables are functional interfaces just like runnables but instead of being
+void they return value.
+Callables can be submitted to executor services just like runnables. But what about the
+callables result? submit() does not wait until task completes, the executor service can
+not return the result of the callable directly. Instead the executor returns a special
+result of type Future which can be used to retrieve the actual result at a later point
+on time.
+
+
+JAVA 11 Tutorial : https://winterbe.com/posts/2018/09/24/java-11-tutorial/
+JAVA 8 Streams : https://winterbe.com/posts/2014/07/31/java8-stream-tutorial-examples/
+JAVA 8 Tutorial : https://winterbe.com/posts/2014/03/16/java-8-tutorial/
+
+completableFuture: https://www.callicoder.com/java-8-completablefuture-tutorial/
+
+MultiThread in Node.js : https://itnext.io/going-multithread-with-node-js-492258ba32cf
+                         https://blog.logrocket.com/node-js-multithreading-what-are-worker-threads-and-why-do-they-matter-48ab102f8b10/
+                         https://itnext.io/multi-threading-and-multi-process-in-node-js-ffa5bb5cde98
+
+
+MongoDB Stitch: https://docs.mongodb.com/stitch/
+Docker for JAVA : https://www.atlassian.com/blog/software-teams/deploy-java-apps-with-docker-awesome
+                    https://stackify.com/guide-docker-java/
+
+Google Juice :
+    https://mvolkmann.github.io/programming/Guice.html
+    https://github.com/google/guice/wiki/GettingStarted
+    https://www.journaldev.com/2403/google-guice-dependency-injection-example-tutorial
+
+MongoDB and JAVA :
+    https://www.mongodb.com/blog/post/getting-started-with-mongodb-and-java-part-i
+    https://www.mongodb.com/blog/post/getting-started-with-mongodb-and-java-part-ii
+
+LogBack :
+    https://mkyong.com/logging/logback-different-log-file-for-each-thread/
+    http://logback.qos.ch/manual/mdc.html
+    https://blog.overops.com/how-to-instantly-improve-your-java-logging-with-7-logback-tweaks/
+    https://www.java-success.com/logging-in-java-with-logback-and-mdc-tutorial/
+    https://www.baeldung.com/mdc-in-log4j-2-logback

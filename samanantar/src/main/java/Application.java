@@ -7,21 +7,34 @@ import com.mongodb.client.MongoDatabase;
 import config.ApplicationModule;
 import config.Configuration;
 import config.ConfigurationService;
+import config.ConfigurationServiceImpl;
+import org.apache.commons.lang.RandomStringUtils;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import util.ConcurrentUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Application
 {
     private ConfigurationService configService;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Application.class);
+
+    private static List<String> colors = Arrays.asList("white", "black", "green", "brown", "orange", "red");
+
+    private ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 
 
     public Application()
     {
-        // This constructor is used when field or method injection is used.
+        LOGGER.info("Application has been initialzied");
     }
 
     //@Inject this constructor is used when constructor injection is used
@@ -39,38 +52,56 @@ public class Application
 
 
 
-    public void run()
+    private void insertData()
     {
         try
         {
             MongoClient mongoClient = configService.getMongoClient();
             MongoDatabase mongoDatabase = configService.getDatabase();
-
             MongoCollection<Document> collection = mongoDatabase.getCollection("pets");
-
             //Inserting one document
-            Document doc = new Document("name", "kitty")
-                    .append("weigh(LB)", 2)
-                    .append("age", 2)
-                    .append("colors", Arrays.asList("black", "white"))
-                    .append("owner", new Document("name", "kitty_owner").append("address", "kitty_home"));
+            String petName = getPetName();
+            Document doc = new Document("name", petName )
+                    .append("weigh(LB)", (int)(Math.random() * (100 - 5 + 1) + 5))
+                    .append("age", (int)(Math.random() * (50 - 1 + 1) + 1))
+                    .append("colors", colors.get((int)(Math.random() * (4 - 0 + 1) + 0)))
+                    .append("owner", new Document("name", petName+"_owner").append("address", petName+"_home"));
+            LOGGER.info("Inserting Data For Pet: Name: {}", petName);
             collection.insertOne(doc);
-            //Inserting many documents
-            List<Document> documents = new ArrayList<Document>();
-            for (int i = 0; i < 100; i++) {
-                documents.add(new Document("i", i));
-            }
-
-            collection.insertMany(documents);
         }
         catch(Exception ex)
         {
-            System.out.println("Exception Thrown "+ ex.toString());
+           LOGGER.error("Exception Thrown: {} ", ex.toString());
         }
-        finally {
-            configService.close();
-        }
+    }
 
+
+    public void run()
+    {
+        Runnable task = () -> {
+
+            LOGGER.info("Scheduling insert to database");
+            insertData();
+        };
+        //Inserting to database every 10 seconds.
+        scheduledExecutorService.scheduleWithFixedDelay(task, 0, 5, TimeUnit.SECONDS);
+
+    }
+
+
+
+    private String getPetName() {
+        int length = (int)(Math.random() * (15 - 3 + 1) + 3);
+        boolean useLetters = true;
+        boolean useNumbers = false;
+        return RandomStringUtils.random(length, useLetters, useNumbers);
+    }
+
+
+    public void close()
+    {
+        configService.close();
+        ConcurrentUtils.stop(scheduledExecutorService);
     }
 
 

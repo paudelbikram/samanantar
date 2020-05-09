@@ -5,6 +5,8 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import jdk.nashorn.internal.runtime.regexp.joni.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Singleton;
@@ -21,17 +23,22 @@ public class ConfigurationServiceImpl implements ConfigurationService
     private static MongoDatabase mongoDatabase;
     private static Configuration configuration;
 
-    public ConfigurationServiceImpl()
-    {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationServiceImpl.class);
+
+    public ConfigurationServiceImpl() throws Exception {
+        LOGGER.info("Creating ConfigurationServiceImpl");
         final Path configPath = Paths.get( "appsettings.json");
         try (final BufferedReader reader = Files.newBufferedReader(configPath))
         {
             configuration = new Gson().fromJson(reader, Configuration.class);
             mongoClient = MongoClients.create(configuration.getMongoConnectionString());
             mongoDatabase = mongoClient.getDatabase("samanantar");
+            LOGGER.info("ConfigurationServiceImpl has been created with configuration: {}, mongoClient: {}",
+                    configuration, mongoClient );
         } catch (IOException e) {
-            System.out.println("Could not read the config file");
-            e.printStackTrace();
+            LOGGER.error("Cound not initialized the ConfigurationServiceImpl with file: {}", configPath);
+            LOGGER.error(e.toString());
+            throw new Exception("Could not initialized dependency for application");
         }
     }
 
